@@ -85,7 +85,29 @@ export default {
     },
     onPlayerError(event) {
       this.$emit('onError', event.data);
-    }
+    },
+    playVideo() {
+      if (this.player && typeof this.player.playVideo === 'function') {
+        this.player.playVideo();
+      }
+    },
+    pauseVideo() {
+      if (this.player && typeof this.player.pauseVideo === 'function') {
+        this.player.pauseVideo();
+      }
+    },
+    seekBackward() {
+      if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.seekTo === 'function') {
+        const currentTime = this.player.getCurrentTime();
+        this.player.seekTo(currentTime - 5, true);
+      }
+    },
+    seekForward() {
+      if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.seekTo === 'function') {
+        const currentTime = this.player.getCurrentTime();
+        this.player.seekTo(currentTime + 5, true);
+      }
+    },
   },
   beforeUnmount() {
     // Clean up the player when the component is destroyed
