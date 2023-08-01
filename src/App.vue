@@ -18,7 +18,7 @@ export default {
     AddSongs,
     // eslint-disable-next-line vue/no-unused-components
     LyricLinkLogin
-  }
+  },
 }
 </script>
 

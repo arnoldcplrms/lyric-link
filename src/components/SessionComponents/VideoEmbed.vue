@@ -16,6 +16,7 @@ import YouTubePlayer from '@/components/SessionComponents/YoutubePlayer.vue';
 import SongsQueue from './SongsQueue.vue';
 import { SOCKET_URL, SOCKET_EVENTS, VIDEO_CONTROL_EVENTS } from '@/constants';
 import io from 'socket.io-client';
+import { fetchSongsFromDb,deleteSongFromDb } from '@/service/db-service';
 
 export default {
   components: {
@@ -23,32 +24,27 @@ export default {
     YouTubePlayer,
   },
   beforeUnmount() {
-    // Close the socket connection when the component is destroyed
     this.socket.disconnect();
   },
   data: () => ({
-    videoId: 'dq912y_GK3o',
+    videoId: '',
     playerVars: {
       disablekb: 1,
       rel: 0,
-      controls:0
+      controls:0,
     },
     currentSong: {
       title: null,
       addedBy: null
     },
-    songs: [{
-      videoId: "tEU77i0RjN4",
-      addedBy: "arnold",
-      title: "YOU",
-    },
-    { videoId: 'XlfTirShNsw', title: 'Magbalik - Callalily (Karaoke)', addedBy: 'Arnold' }],
+    songs: [],
     player: null,
-    socket: null
+    socket: null,
+    isPristine:true,
   }),
   watch: {
     videoId(newVideoId) {
-      if (this.player) {
+      if (this.player && !this.songs.length) {
         this.player.loadVideoById(newVideoId);
       }
     },
@@ -56,6 +52,12 @@ export default {
   mounted() {
     this.initEventBus()
     this.initSocket()
+    fetchSongsFromDb().then(results =>{
+      this.songs = results
+      if (this.songs.length) {
+        this.setNextSong()
+      }
+    })
   },
   methods: {
     initSocket() {
@@ -97,13 +99,15 @@ export default {
         this.nextSong()
       }
     },
-    nextSong() {
-      if (this.songs.length) {
-        const nextSong = this.songs.shift();
-        this.videoId = nextSong.videoId
-        this.currentSong.addedBy = nextSong.addedBy
-        this.currentSong.title = nextSong.title
-      }
+    async nextSong() {
+      await deleteSongFromDb(this.videoId)
+      this.setNextSong()
+    },
+    setNextSong(){
+      const nextSong = this.songs.shift();
+      this.videoId = nextSong.videoId
+      this.currentSong.addedBy = nextSong.addedBy
+      this.currentSong.title = nextSong.title
     },
     errorHandler() {
       alert('error')
@@ -125,5 +129,4 @@ export default {
 </script>
 
 <style scoped>
-.col-10 .col-2 {}
 </style>

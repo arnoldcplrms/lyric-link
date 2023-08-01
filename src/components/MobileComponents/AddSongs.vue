@@ -49,6 +49,7 @@
 <script>
 import { testVideos, MAX_PAGE_RESULT, YOUTUBE_API_KEY, SOCKET_URL, SOCKET_EVENTS } from "@/constants";
 import io from 'socket.io-client';
+import { addSongToDb } from "@/service/db-service";
 
 export default {
   data: () => ({
@@ -97,8 +98,7 @@ export default {
         this.loading = false;
       }
     },
-    addToQueue(video) {
-      // Implement the logic to add the video to your queue here
+    async addToQueue(video) {
       const videoTitle = video.snippet.title;
       const isKaraokeVideo = videoTitle.toLowerCase().includes('karaoke');
       if (!isKaraokeVideo) {
@@ -108,7 +108,7 @@ export default {
       this.addedVideos.add(video.id.videoId);
       const songToQueue = { videoId: video.id.videoId, title: video.snippet.title, addedBy: this.userName }
       console.log('Video added to queue:', songToQueue);
-
+      await addSongToDb(songToQueue)
       this.socket.emit(SOCKET_EVENTS.ADD_SONG_TO_QUEUE, songToQueue);
     },
     isAdded(video) {
@@ -119,7 +119,7 @@ export default {
       if (this.$refs.resultsContainer) {
         this.$refs.resultsContainer.scrollIntoView({ behavior: 'smooth' });
       }
-    }
+    },
   }
 };
 </script>
