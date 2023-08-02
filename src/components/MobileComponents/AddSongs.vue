@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { testVideos, MAX_PAGE_RESULT, YOUTUBE_API_KEY, SOCKET_URL, SOCKET_EVENTS } from "@/constants";
+import { testVideos, SOCKET_URL, SOCKET_EVENTS, YOUTUBE_REQUEST_URL_BUILDER } from "@/constants";
 import io from 'socket.io-client';
 import { addSongToDb } from "@/service/db-service";
 
@@ -83,13 +83,9 @@ export default {
     async searchVideos() {
       try {
         this.loading = true;
-        const response = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&q=${encodeURIComponent(
-            `${this.searchText}+Karaoke`
-          )}&part=snippet&type=video&maxResults=${MAX_PAGE_RESULT}&videoEmbeddable=true`
-        );
-
+        const response = await fetch(YOUTUBE_REQUEST_URL_BUILDER(this.searchText));
         const data = await response.json();
+        this.handleSerchResultEmit(data.items)
         this.videos = data.items;
       } catch (error) {
         alert(error.message);
@@ -107,12 +103,13 @@ export default {
 
       this.addedVideos.add(video.id.videoId);
       const songToQueue = { videoId: video.id.videoId, title: video.snippet.title, addedBy: this.userName }
-      console.log('Video added to queue:', songToQueue);
+      const metaData = { thumbnails: video.snippet.thumbnails, publishedAt: video.snippet.publishedAt }
       await addSongToDb(songToQueue)
-      this.socket.emit(SOCKET_EVENTS.ADD_SONG_TO_QUEUE, songToQueue);
+      this.socket.emit(SOCKET_EVENTS.ADD_SONG_TO_QUEUE, { songToQueue, metaData });
     },
     isAdded(video) {
-      return this.addedVideos.has(video.id.videoId); // Check if video is in the set of added videos
+      // Check if video is in the set of added videos
+      return this.addedVideos.has(video.id.videoId);
     },
     scrollResultsToTop() {
       // Scroll to the top of the results container
@@ -120,6 +117,17 @@ export default {
         this.$refs.resultsContainer.scrollIntoView({ behavior: 'smooth' });
       }
     },
+    handleSerchResultEmit(results) {
+      const searchResults = results.map(data => ({
+        thumbnails: data.snippet.thumbnails,
+        publishedAt: data.snippet.publishedAt,
+        videoId: data.id.videoId,
+        title: data.snippet.title,
+        searchQuery: this.searchText
+      }))
+
+      this.socket.emit(SOCKET_EVENTS.SAVE_SEARCH_RESULT, { searchResults, searchQuery: this.searchText })
+    }
   }
 };
 </script>

@@ -1,5 +1,5 @@
 export const YOUTUBE_API_KEY = 'AIzaSyCDSyDy2-QyWSHEbGV9JYCFlbFByPnO05o';
-export const MAX_PAGE_RESULT = 30
+export const MAX_PAGE_RESULT = 40
 export const NEXT_SONG_EVENT = 'NEXT_SONG_EVENT'
 export const VIDEO_CONTROL_EVENTS = {
     NEXT_SONG:'NEXT_SONG_EVENT',
@@ -10,9 +10,15 @@ export const VIDEO_CONTROL_EVENTS = {
 }
 export const SOCKET_URL = 'http://192.168.254.105:3000'
 export const SOCKET_EVENTS = {
-    ADD_SONG_TO_QUEUE:'ADD_SONG_TO_QUEUE'
-}
+    ADD_SONG_TO_QUEUE:'ADD_SONG_TO_QUEUE',
+    SAVE_SEARCH_RESULT:'SAVE_SEARCH_RESULT',
+    VIDEO_UNEMBEDDABLE:'VIDEO_UNEMBEDDABLE'
+  }
 
+export const YOUTUBE_REQUEST_URL_BUILDER = (searchText)=> 
+`https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&q=${encodeURIComponent(
+    `${searchText}+Karaoke`
+  )}&part=snippet&type=video&maxResults=${MAX_PAGE_RESULT}&videoEmbeddable=true`
 
 export const testVideos = [
   {

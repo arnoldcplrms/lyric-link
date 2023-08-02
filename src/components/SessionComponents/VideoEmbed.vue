@@ -16,7 +16,7 @@ import YouTubePlayer from '@/components/SessionComponents/YoutubePlayer.vue';
 import SongsQueue from './SongsQueue.vue';
 import { SOCKET_URL, SOCKET_EVENTS, VIDEO_CONTROL_EVENTS } from '@/constants';
 import io from 'socket.io-client';
-import { fetchSongsFromDb,deleteSongFromDb } from '@/service/db-service';
+import { fetchSongsFromDb, deleteSongFromDb } from '@/service/db-service';
 
 export default {
   components: {
@@ -31,7 +31,7 @@ export default {
     playerVars: {
       disablekb: 1,
       rel: 0,
-      controls:0,
+      controls: 0,
     },
     currentSong: {
       title: null,
@@ -40,7 +40,7 @@ export default {
     songs: [],
     player: null,
     socket: null,
-    isPristine:true,
+    isPristine: true,
   }),
   watch: {
     videoId(newVideoId) {
@@ -52,7 +52,7 @@ export default {
   mounted() {
     this.initEventBus()
     this.initSocket()
-    fetchSongsFromDb().then(results =>{
+    fetchSongsFromDb().then(results => {
       this.songs = results
       if (this.songs.length) {
         this.setNextSong()
@@ -67,6 +67,11 @@ export default {
       // Handle events from the server
       this.socket.on(SOCKET_EVENTS.ADD_SONG_TO_QUEUE, (data) => {
         this.songs.push(data)
+        if (!this.currentSong.title) {
+          setTimeout(() => {
+            this.nextSong()
+          }, 2000)
+        }
       });
 
       // Handle any errors that occur with the socket connection
@@ -100,17 +105,19 @@ export default {
       }
     },
     async nextSong() {
-      await deleteSongFromDb(this.videoId)
-      this.setNextSong()
+      if (this.songs.length) {
+        await deleteSongFromDb(this.videoId)
+        this.setNextSong()
+      }
     },
-    setNextSong(){
+    setNextSong() {
       const nextSong = this.songs.shift();
       this.videoId = nextSong.videoId
       this.currentSong.addedBy = nextSong.addedBy
       this.currentSong.title = nextSong.title
     },
     errorHandler() {
-      alert('error')
+      this.socket.emit(SOCKET_EVENTS.VIDEO_UNEMBEDDABLE,{videoId:this.videoId,title:this.currentSong.title})
     },
     playVideo() {
       this.$refs.youtubePlayer.playVideo();
@@ -128,5 +135,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

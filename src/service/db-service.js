@@ -15,6 +15,9 @@ export const fetchSongsFromDb = () => {
 
 export const deleteSongFromDb = (videoId) => {
   try {
+    if (!videoId) {
+      return
+    }
     db.collection("songs").doc({ videoId }).delete();
   } catch (error) {
     return false

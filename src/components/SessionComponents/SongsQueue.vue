@@ -23,7 +23,8 @@
       <div class="button-container">
         <div class="d-flex justify-content-between mt-2">
           <!-- Add icon to the Play button -->
-          <button @click="playOrPauseVideo" type="button" class="btn w-50" :class="videoPaused ? 'btn-success' : 'btn-primary'" style="margin-right: 5px;">
+          <button @click="playOrPauseVideo" type="button" class="btn w-50"
+            :class="videoPaused ? 'btn-success' : 'btn-primary'" style="margin-right: 5px;">
             <i v-if="videoPaused" class="bi-play-fill"></i>
             <i v-else class="bi-pause-fill"></i>
           </button>
@@ -40,8 +41,8 @@
           </button>
           <!-- Add icon to the Forward button -->
           <button @click="forward" type="button" class="btn btn-info w-50">
-              <i class="bi-chevron-double-right"></i>
-            </button>
+            <i class="bi-chevron-double-right"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -52,8 +53,8 @@
 import { VIDEO_CONTROL_EVENTS } from '@/constants';
 import eventbus from '@/utils/eventbus';
 export default {
-  data:()=>({
-    videoPaused:true
+  data: () => ({
+    videoPaused: true
   }),
   props: {
     songs: {
@@ -63,35 +64,41 @@ export default {
       type: Object,
     },
   },
-  mounted(){
+  mounted() {
     document.addEventListener('keypress', this.handleKeyPress);
   },
   methods: {
     playNext() {
       eventbus.$emit(VIDEO_CONTROL_EVENTS.NEXT_SONG)
     },
-    playOrPauseVideo(){
-     if (this.videoPaused) {
+    playOrPauseVideo() {
+      if (this.videoPaused) {
         eventbus.$emit(VIDEO_CONTROL_EVENTS.PLAY)
         this.videoPaused = false
-      }else {
+      } else {
         eventbus.$emit(VIDEO_CONTROL_EVENTS.PAUSE)
         this.videoPaused = true
       }
     },
-    forward(){
+    forward() {
       eventbus.$emit(VIDEO_CONTROL_EVENTS.FAST_FORWARD)
     },
-    reverse(){
+    reverse() {
       eventbus.$emit(VIDEO_CONTROL_EVENTS.REVERSE)
     },
-    handleKeyPress(event){
+    handleKeyPress(event) {
       switch (event.key) {
         case '1':
           this.playOrPauseVideo()
           break;
         case '2':
           this.playNext()
+          break;
+        case '3':
+          this.reverse()
+          break;
+        case '4':
+          this.forward()
           break;
         default:
           break;
@@ -134,6 +141,4 @@ export default {
 i {
   font-size: 15px !important;
 }
-
-
 </style>

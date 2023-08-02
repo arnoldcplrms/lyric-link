@@ -1,23 +1,13 @@
 <template>
-  <div style="height: 100vh;">
+  <div style="height: 110vh;">
       <router-view></router-view>
   </div>
 </template>
 
 <script>
-import VideoEmbed from './components/SessionComponents/VideoEmbed.vue'
-import AddSongs from './components/MobileComponents/AddSongs.vue'
-import LyricLinkLogin from './components/LyricLinkLogin.vue'
-
 export default {
   name: 'App',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
-    VideoEmbed,
-    // eslint-disable-next-line vue/no-unused-components
-    AddSongs,
-    // eslint-disable-next-line vue/no-unused-components
-    LyricLinkLogin
   },
 }
 </script>
