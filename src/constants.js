@@ -15,8 +15,11 @@ export const SOCKET_EVENTS = {
     VIDEO_UNEMBEDDABLE:'VIDEO_UNEMBEDDABLE'
   }
 
+// const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3'
+const RAPID_API_BASE_URL = 'https://youtube-v31.p.rapidapi.com'
+
 export const YOUTUBE_REQUEST_URL_BUILDER = (searchText)=> 
-`https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&q=${encodeURIComponent(
+`${RAPID_API_BASE_URL}/search?q=${encodeURIComponent(
     `${searchText}+Karaoke`
   )}&part=snippet&type=video&maxResults=${MAX_PAGE_RESULT}&videoEmbeddable=true`
 

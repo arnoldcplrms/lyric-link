@@ -20,6 +20,10 @@ export default {
     playerVars: {
       type: Object,
       default: () => ({})
+    },
+    autoplay: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -63,8 +67,12 @@ export default {
         }
       });
     },
-    onPlayerReady() {
+    onPlayerReady(event) {
+      if (!this.autoplay) {
+        event.target.pauseVideo(); // Pause the video if autoplay is disabled
+      }
       // You can perform any actions here after the player is ready (e.g., autoplay)
+      this.$emit('onPlayerReady',event.data)
     },
     onPlayerStateChange(event) {
       switch (event.data) {

@@ -16,7 +16,7 @@ import YouTubePlayer from '@/components/SessionComponents/YoutubePlayer.vue';
 import SongsQueue from './SongsQueue.vue';
 import { SOCKET_URL, SOCKET_EVENTS, VIDEO_CONTROL_EVENTS } from '@/constants';
 import io from 'socket.io-client';
-import { fetchSongsFromDb, deleteSongFromDb } from '@/service/db-service';
+import { fetchSongsFromDb } from '@/service/db-service';
 
 export default {
   components: {
@@ -57,7 +57,7 @@ export default {
       if (this.songs.length) {
         this.setNextSong()
       }
-    })
+    }).catch(err=>{alert(err.message)})
   },
   methods: {
     initSocket() {
@@ -106,7 +106,7 @@ export default {
     },
     async nextSong() {
       if (this.songs.length) {
-        await deleteSongFromDb(this.videoId)
+        // await deleteSongFromDb(this.videoId)
         this.setNextSong()
       }
     },

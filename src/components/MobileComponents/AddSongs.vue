@@ -14,7 +14,7 @@
                 <div class="button-container">
                   <button
                     :class="['btn', 'w-100', 'btn-block', 'mt-2', isAdded(video) ? 'btn-outline-succes' : 'btn-success']"
-                    @click="addToQueue(video)" :disabled="isAdded(video)">
+                    @click="validateVideo(video)" :disabled="isAdded(video)">
                     {{ isAdded(video) ? 'Song Added' : 'Add To Queue' }}
                   </button>
                 </div>
@@ -27,6 +27,33 @@
       <div v-else class="loading-container">
         <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
           <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div class="modal fade" tabindex="-1" role="dialog" ref="myModal" id="exampleModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Modal Title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div style="display:none;">
+                <div v-if="loadVideo">
+                  <YoutubePlayer :playerVars="playerVars" ref="youtubePlayer" width="'100%'" :height="'100%'" :videoId="videoId"
+                    @onPlayerReady="videoPlayable" @onError="videoNotPlayable" />
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -47,9 +74,11 @@
 </template>
 
 <script>
-import { testVideos, SOCKET_URL, SOCKET_EVENTS, YOUTUBE_REQUEST_URL_BUILDER } from "@/constants";
-import io from 'socket.io-client';
-import { addSongToDb } from "@/service/db-service";
+import { testVideos, SOCKET_EVENTS, YOUTUBE_REQUEST_URL_BUILDER } from "@/constants";
+import YoutubePlayer from '@/components/SessionComponents/YoutubePlayer.vue';
+// import io from 'socket.io-client';
+// import { addSongToDb } from "@/service/db-service";
+
 
 export default {
   data: () => ({
@@ -59,7 +88,20 @@ export default {
     loading: true,
     userName: '',
     socket: null,
+    videoId: '',
+    videoObj: '',
+    isVerifying: false,
+    playerVars: {
+      autoplay: 1,  // Disable autoplay
+      mute: 1,
+    },
+    loadVideo: true,
+    isVideoPlayable: true,
+    isModalVisible: false,
   }),
+  components: {
+    YoutubePlayer
+  },
   mounted() {
     if (!localStorage.getItem('userName')) {
       this.$router.push('/')
@@ -72,7 +114,7 @@ export default {
       this.loading = false;
     }, 3000);
 
-    this.socket = io(SOCKET_URL)
+    // this.socket = io(SOCKET_URL)
   },
   watch: {
     videos() {
@@ -80,12 +122,30 @@ export default {
     }
   },
   methods: {
+    generateUrl(videoId) {
+      return `https://www.youtube.com/embed/${videoId}`
+    },
+    videoPlayable() {
+      console.log('VIDEO PLAYABLE')
+    },
+    videoNotPlayable() {
+      this.isVideoPlayable = false
+    },
     async searchVideos() {
       try {
         this.loading = true;
-        const response = await fetch(YOUTUBE_REQUEST_URL_BUILDER(this.searchText));
+
+        // TODO CREATE A SERVICE FOR REQUESTS FALLBACKS
+        const response = await fetch(YOUTUBE_REQUEST_URL_BUILDER(this.searchText), {
+          headers: {
+            'X-RapidAPI-Key': 'c7bcb170d6mshe578c0a54f72cfcp10ff03jsna074fd3e491b',
+            'X-RapidAPI-Host': 'youtube-v31.p.rapidapi.com'
+          }
+        });
         const data = await response.json();
+        console.log(data)
         this.handleSerchResultEmit(data.items)
+
         this.videos = data.items;
       } catch (error) {
         alert(error.message);
@@ -93,6 +153,38 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    validateVideo(video) {
+      this.loadVideo = true
+      this.videoObj = video
+      this.videoId = video.id.videoId
+      this.videoUrl = this.generateUrl(this.videoId)
+      this.inspectPlayability()
+      this.embedVideo()
+      this.sendToQueue()
+      this.openModal()
+    },
+    inspectPlayability() {
+      setTimeout(() => {
+        this.$refs.youtubePlayer.playVideo();
+      }, 1000)
+    },
+    embedVideo() {
+      setTimeout(() => {
+        this.loadVideo = false
+      }, 2000)
+    },
+    sendToQueue() {
+      setTimeout(() => {
+        if (this.isVideoPlayable) {
+          console.log('VIDEO SENT TO QUEUE')
+          // this.addToQueue()
+          this.isVideoPlayable = true
+        } else {
+          alert('video is restricted by the author/channel')
+          console.log('video is restricted by the author/channel')
+        }
+      }, 2500)
     },
     async addToQueue(video) {
       const videoTitle = video.snippet.title;
@@ -104,7 +196,6 @@ export default {
       this.addedVideos.add(video.id.videoId);
       const songToQueue = { videoId: video.id.videoId, title: video.snippet.title, addedBy: this.userName }
       const metaData = { thumbnails: video.snippet.thumbnails, publishedAt: video.snippet.publishedAt }
-      await addSongToDb(songToQueue)
       this.socket.emit(SOCKET_EVENTS.ADD_SONG_TO_QUEUE, { songToQueue, metaData });
     },
     isAdded(video) {
@@ -127,6 +218,16 @@ export default {
       }))
 
       this.socket.emit(SOCKET_EVENTS.SAVE_SEARCH_RESULT, { searchResults, searchQuery: this.searchText })
+    },
+    openModal() {
+      this.$refs.myModal.classList.add('show');
+      document.body.classList.add('modal-open');
+      this.$refs.myModal.style.display = 'block';
+    },
+    closeModal() {
+      this.$refs.myModal.classList.remove('show');
+      document.body.classList.remove('modal-open');
+      this.$refs.myModal.style.display = 'none';
     }
   }
 };
@@ -156,8 +257,13 @@ export default {
   transition: opacity 0.5s;
 }
 
-.fade-enter,
-.fade-leave-to {
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter, .modal-fade-leave-to {
   opacity: 0;
 }
+
 </style>

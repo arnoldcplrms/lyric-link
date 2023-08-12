@@ -26,11 +26,13 @@
           <button @click="playOrPauseVideo" type="button" class="btn w-50"
             :class="videoPaused ? 'btn-success' : 'btn-primary'" style="margin-right: 5px;">
             <i v-if="videoPaused" class="bi-play-fill"></i>
-            <i v-else class="bi-pause-fill"></i>
+            <i v-else class="bi-pause-fill"></i> 
+            (1)
           </button>
           <!-- Add icon to the Next button -->
           <button @click="playNext" type="button" class="btn btn-danger w-50" :disabled="!songs.length">
             <i class="bi-skip-forward-fill"></i>
+            (2)
           </button>
         </div>
 
@@ -38,10 +40,12 @@
           <!-- Add icon to the Backward button -->
           <button @click="reverse" type="button" class="btn btn-warning w-50" style="margin-right: 5px;">
             <i class="bi-chevron-double-left"></i>
+            (3)
           </button>
           <!-- Add icon to the Forward button -->
           <button @click="forward" type="button" class="btn btn-info w-50">
             <i class="bi-chevron-double-right"></i>
+            (4)
           </button>
         </div>
       </div>
@@ -135,7 +139,7 @@ export default {
 }
 
 * {
-  font-size: 9px !important;
+  font-size: 6px !important;
 }
 
 i {
