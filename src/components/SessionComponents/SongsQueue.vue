@@ -1,57 +1,54 @@
 <template>
   <div class="bg-dark">
-    <div id="linksDiv" class="list-group bg-dark">
-      <div class="alert alert-success" role="alert">
+    <v-container>
+      <v-alert class="alert-success" role="alert">
         Now playing : <br>
         <h5>{{ currentSong.title || 'NONE' }}</h5>
         Added by:
         <h5>{{ currentSong.addedBy || 'NONE' }}</h5>
         Remaining songs: {{ songs.length }}
-      </div>
+      </v-alert>
 
-      <span class="d-flex justify-content-center align-items-center mt-2" v-if="songs.length === 0">
+      <v-row v-if="songs.length === 0" class="d-flex justify-content-center align-items-center mt-2">
         <h5 class="text-light">NO SONGS ADDED</h5>
-      </span>
+      </v-row>
 
       <div class="list-group-scroll">
-        <li v-for="(song, index) in songs" :key="index" class="list-group-item bg-dark border-0 py-3 text-light">
-          <p v-if="index + 1 === 1" class="fs-5 text-warning">UP NEXT </p>
-          <p :class="index + 1 === 1 ? 'mb-1 fs-6 text-warning' : 'mb-1 fs-6'">#{{ index + 1 }} {{ song.title }}</p>
-          <p :class="index + 1 === 1 ? 'mb-1 fs-6 text-warning' : 'mb-1 fs-6'">Added by: {{ song.addedBy }}</p>
-        </li>
+        <v-list>
+          <v-list-item v-for="(song, index) in songs" :key="index" class="border-0 py-3">
+            <p v-if="index + 1 === 1" class="fs-5 text-warning">UP NEXT </p>
+            <p :class="index + 1 === 1 ? 'mb-1 fs-6 text-warning' : 'mb-1 fs-6'">#{{ index + 1 }} {{ song.title }}</p>
+            <p :class="index + 1 === 1 ? 'mb-1 fs-6 text-warning' : 'mb-1 fs-6'">Added by: {{ song.addedBy }}</p>
+          </v-list-item>
+        </v-list>
       </div>
       <div class="button-container">
-        <div class="d-flex justify-content-between mt-2">
-          <!-- Add icon to the Play button -->
-          <button @click="playOrPauseVideo" type="button" class="btn w-50"
-            :class="videoPaused ? 'btn-success' : 'btn-primary'" style="margin-right: 5px;">
-            <i v-if="videoPaused" class="bi-play-fill"></i>
-            <i v-else class="bi-pause-fill"></i> 
-            (1)
-          </button>
-          <!-- Add icon to the Next button -->
-          <button @click="playNext" type="button" class="btn btn-danger w-50" :disabled="!songs.length">
-            <i class="bi-skip-forward-fill"></i>
-            (2)
-          </button>
-        </div>
-
-        <div class="d-flex justify-content-between mt-2">
-          <!-- Add icon to the Backward button -->
-          <button @click="reverse" type="button" class="btn btn-warning w-50" style="margin-right: 5px;">
-            <i class="bi-chevron-double-left"></i>
-            (3)
-          </button>
-          <!-- Add icon to the Forward button -->
-          <button @click="forward" type="button" class="btn btn-info w-50">
-            <i class="bi-chevron-double-right"></i>
-            (4)
-          </button>
-        </div>
+        <v-row class="d-flex justify-content-center mt-4">
+          <v-btn-group>
+            <v-btn size="small" @click="playOrPauseVideo" :class="[videoPaused ? 'btn-success' : 'btn-primary']">
+              <v-icon v-if="videoPaused">mdi-play</v-icon>
+              <v-icon v-else>mdi-pause</v-icon>
+              (1)
+            </v-btn>
+            <v-btn size="small" @click="playNext" class="btn btn-danger" :disabled="!songs.length">
+              <v-icon>mdi-skip-forward-fill</v-icon>
+              (2)
+            </v-btn>
+            <v-btn size="small" @click="reverse" class="btn btn-warning">
+              <v-icon>mdi-chevron-double-left</v-icon>
+              (3)
+            </v-btn>
+            <v-btn size="small" @click="forward" class="btn btn-info">
+              <v-icon>mdi-chevron-double-right</v-icon>
+              (4)
+            </v-btn>
+          </v-btn-group>
+        </v-row>
       </div>
-    </div>
+    </v-container>
   </div>
 </template>
+
 
 <script>
 import { VIDEO_CONTROL_EVENTS } from '@/constants';
@@ -119,7 +116,7 @@ export default {
 /* Styles for the component */
 #linksDiv {
   width: 100%;
-  height: 95vh;
+  height: 100vh;
   overflow-y: scroll;
   background-color: #f8f9fa;
   padding-right: 20px;
@@ -127,7 +124,7 @@ export default {
 }
 
 .list-group-scroll {
-  height: 100%;
+  height:75vh;
   max-height: 100vh;
   overflow-y: auto;
 }

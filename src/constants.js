@@ -21,7 +21,7 @@ const RAPID_API_BASE_URL = 'https://youtube-v31.p.rapidapi.com'
 export const YOUTUBE_REQUEST_URL_BUILDER = (searchText)=> 
 `${RAPID_API_BASE_URL}/search?q=${encodeURIComponent(
     `${searchText}+Karaoke`
-  )}&part=snippet&type=video&maxResults=${MAX_PAGE_RESULT}&videoEmbeddable=true`
+  )}&part=snippet&type=video&maxResults=${MAX_PAGE_RESULT}&videoEmbeddable=true&regionCode=PH`
 
 export const testVideos = [
   {

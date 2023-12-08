@@ -1,13 +1,13 @@
 <template>
-  <div class="row bg-dark" style="height: 100%;">
-    <div class="col-10" style="pointer-events: none;">
+  <v-row class="bg-dark" style="height: 100%;">
+    <v-col cols="10" style="pointer-events: none;">
       <YouTubePlayer :videoId="videoId" :width="'100%'" :height="'100%'" :playerVars="playerVars" @onEnd="nextSong"
         @onError="errorHandler" ref="youtubePlayer" />
-    </div>
-    <div class="col-2" style="height: 100%;">
+    </v-col>
+    <v-col cols="2" style="height: 100%;">
       <SongsQueue :currentSong="currentSong" :songs="songs" />
-    </div>
-  </div>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
